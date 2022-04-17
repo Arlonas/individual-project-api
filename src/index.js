@@ -6,7 +6,8 @@ dotenv.config()
 
 const PORT = process.env.PORT
 
-const { sequelize } = require("../lib/sequelize")
+
+const { sequelize } = require("./lib/sequelize")
 sequelize.sync({ alter: true })
 
 const app = express()
@@ -17,7 +18,7 @@ app.use(express.json())
 const { authRoutes } = require("./routes")
 app.use("/auth", authRoutes)
 
-app.use((res) => {
+app.use((req, res) => {
     return res.status(500).json({
         message:"Server error"
     })
