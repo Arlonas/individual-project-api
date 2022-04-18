@@ -18,7 +18,7 @@ app.use(express.json())
 const { authRoutes } = require("./routes")
 app.use("/auth", authRoutes)
 
-app.use((req, res) => {
+app.use((res) => {
     return res.status(500).json({
         message:"Server error"
     })
