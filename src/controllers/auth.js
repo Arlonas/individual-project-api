@@ -5,6 +5,8 @@ const { generateToken, verifyToken } = require("../lib/jwt");
 const mailer = require("../lib/mailer");
 const mustache = require("mustache")
 const fs = require("fs");
+// tanya kak theo gimn carnaya forget password pake jwt
+// kalo mau tampilin waktu buat di detail post hrs ditolocalestring
 const authControllers = {
   signupUser: async (req, res, next) => {
     try {
@@ -199,7 +201,24 @@ const authControllers = {
       next();
     }
   },
-  forgotPassword: async (req, res, next) => {}
+  forgotPassword: async (req, res, next) => {
+    try {
+      const { email } = req.body
+
+      const findUser = await User.findOne({
+        where: {
+          email
+        }
+      })
+
+      const forgotPasswordToken = generateToken({
+        id: findUser.id
+      }, "15m");
+    } catch (err) {
+      console.log(err)
+      next()
+    }
+  }
 };
 
 module.exports = authControllers;

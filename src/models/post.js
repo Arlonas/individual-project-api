@@ -22,4 +22,4 @@ const Post = (sequelize) => {
   );
 };
 
-// module.exports = Post;
+module.exports = Post;

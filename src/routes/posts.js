@@ -3,7 +3,7 @@ const router = require("express").Router()
 
 router.get("/", postControllers.getAllPost)
 
-router.post("/", )
+router.post("/", postControllers.createPost)
 
 router.delete("/:id", )
 

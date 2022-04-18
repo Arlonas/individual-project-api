@@ -15,8 +15,9 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-const { authRoutes } = require("./routes")
+const { authRoutes, postRoutes } = require("./routes")
 app.use("/auth", authRoutes)
+app.use("/post", postRoutes)
 
 app.use((res) => {
     return res.status(500).json({
