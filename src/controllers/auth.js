@@ -14,6 +14,7 @@ const authControllers = {
           [Op.or]: [{ username }, { email }],
         },
       });
+      console.log(isUsernameEmailTaken)
 
       if (isUsernameEmailTaken) {
         return res.status(400).json({
@@ -52,6 +53,8 @@ const authControllers = {
 
       return res.status(201).json({
         message: "Registered User",
+        // di frontend g perlu res.data.result.datavalues lagi lgsng aja username ato id 
+        result: isUsernameEmailTaken
       });
     } catch (err) {
       console.log(err);
@@ -196,6 +199,7 @@ const authControllers = {
       next();
     }
   },
+  forgotPassword: async (req, res, next) => {}
 };
 
 module.exports = authControllers;
