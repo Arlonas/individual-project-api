@@ -10,7 +10,7 @@ const fs = require("fs");
 const authControllers = {
   signupUser: async (req, res, next) => {
     try {
-      const { username, email, full_name, password } = req.body;
+      const { username, email, password } = req.body;
       const isUsernameEmailTaken = await User.findOne({
         where: {
           [Op.or]: [{ username }, { email }],
@@ -29,7 +29,6 @@ const authControllers = {
       const newUser = await User.create({
         username,
         email,
-        full_name,
         password: hashedPassword,
       });
 
@@ -56,11 +55,11 @@ const authControllers = {
       return res.status(201).json({
         message: "Registered User",
         // di frontend g perlu res.data.result.datavalues lagi lgsng aja username ato id 
-        result: isUsernameEmailTaken
+        result: newUser
       });
     } catch (err) {
       console.log(err);
-      next();
+      next(res);
     }
   },
   signinUser: async (req, res, next) => {
@@ -109,7 +108,7 @@ const authControllers = {
       });
     } catch (err) {
       console.log(err);
-      next();
+      next(res);
     }
   },
   verifyUser: async (req, res, next) => {
@@ -136,7 +135,7 @@ const authControllers = {
       return res.redirect(`http://localhost:3000/verification-success?referral=${token}`)
     } catch (err) {
       console.log(err);
-      next();
+      next(res);
     }
   },
   keepLogin: async (req, res, next) => {
@@ -158,7 +157,7 @@ const authControllers = {
       });
     } catch (err) {
       console.log(err);
-      next();
+      next(res);
     }
   },
   resendVerificationEmail: async (req, res, next) => {
@@ -198,7 +197,7 @@ const authControllers = {
       });
     } catch (err) {
       console.log(err);
-      next();
+      next(res);
     }
   },
   forgotPassword: async (req, res, next) => {
@@ -214,9 +213,13 @@ const authControllers = {
       const forgotPasswordToken = generateToken({
         id: findUser.id
       }, "15m");
+
+      
+
+      // di frontend dapetin token di url itu pake router.query.token
     } catch (err) {
       console.log(err)
-      next()
+      next(res)
     }
   }
 };
