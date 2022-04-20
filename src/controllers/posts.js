@@ -1,4 +1,6 @@
+const { nanoid } = require("nanoid");
 const { Post, User } = require("../lib/sequelize");
+const fs = require("fs")
 
 const PostControllers = {
   getAllPost: async (req, res, next) => {
@@ -42,7 +44,7 @@ const PostControllers = {
   },
   createPost: async (req, res, next) => {
     try {
-      const { image_url, location, caption } = req.body;
+      const { location, caption, likes, date, user_id } = req.body;
 
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = `post-images`;
@@ -52,6 +54,9 @@ const PostControllers = {
         image_url: `${uploadFileDomain}/${filePath}/${fileName}`,
         location,
         caption,
+        likes,
+        date,
+        user_id: nanoid()
       });
       return res.status(201).json({
         message: "Post created",
@@ -59,6 +64,7 @@ const PostControllers = {
       });
     } catch (err) {
       console.log(err);
+      fs.unlinkSync(__dirname + "/../public/posts/" + req.file.filename)
       next(res);
     }
   },
