@@ -18,10 +18,10 @@ const PostControllers = {
           {
             model: User,
             attributes: {
-              exclude: ["password"]
-            }
-          }
-        ]
+              exclude: ["password"],
+            },
+          },
+        ],
       });
 
       return res.status(200).json({
@@ -35,7 +35,6 @@ const PostControllers = {
   },
   getPostById: async (req, res, next) => {
     // try {
-      
     // } catch (err) {
     //   console.log(err)
     //   next(res)
@@ -44,8 +43,13 @@ const PostControllers = {
   createPost: async (req, res, next) => {
     try {
       const { image_url, location, caption } = req.body;
+
+      const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
+      const filePath = `post-images`;
+      const { fileName } = req.file.filename;
+
       const newPost = await Post.create({
-        image_url,
+        image_url: `${uploadFileDomain}/${filePath}/${fileName}`,
         location,
         caption,
       });
@@ -83,24 +87,24 @@ const PostControllers = {
     }
   },
   deletePostById: async (req, res, next) => {
-      try {
-          const { id } = req.params
+    try {
+      const { id } = req.params;
 
-          const deletedPost = await Post.destroy({
-              where: {
-                  id,
-                  user_id: req.token.id
-              }
-          })
+      const deletedPost = await Post.destroy({
+        where: {
+          id,
+          user_id: req.token.id,
+        },
+      });
 
-          return res.status(201).json({
-              message: "Post deleted",
-              result: deletedPost
-          })
-      } catch (err) {
-          console.log(err)
-          next(res)
-      }
+      return res.status(201).json({
+        message: "Post deleted",
+        result: deletedPost,
+      });
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
   },
 };
 

@@ -16,6 +16,10 @@ app.use(cors())
 app.use(express.json())
 
 const { authRoutes, postRoutes } = require("./routes")
+
+app.use("/post-images", express.static(`${__dirname}/public/posts`))
+app.use("/profile-pictures", express.static(`${__dirname}/public/profile_pictures`))
+
 app.use("/auth", authRoutes)
 app.use("/post", postRoutes)
 
