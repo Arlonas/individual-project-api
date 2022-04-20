@@ -13,12 +13,15 @@ const sequelize = new Sequelize({
 // Models
 const Post = require("../models/post")(sequelize)
 const User = require("../models/user")(sequelize)
-const Like = require("../models/like")(sequelize)
+// const Like = require("../models/like")(sequelize)
 
 // Relationships is complicated
 // 1 : M
 Post.belongsTo(User, { foreignKey: "user_id" })
 User.hasMany(Post, { foreignKey: "user_id" })
+
+// Post.belongsToMany(User, { through: Like })
+// User.belongsToMany(Post, { through: Like })
 
 module.exports = {
     sequelize,

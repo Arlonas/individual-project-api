@@ -5,7 +5,7 @@ const authorizedLoggedInUser = (req, res, next) => {
     const token = req.headers.authorization;
 
     const verifiedToken = verifyToken(token);
-    req.headers = verifiedToken;
+    req.token = verifiedToken;
     next();
   } catch (err) {
     console.log(err);

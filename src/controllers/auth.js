@@ -5,6 +5,7 @@ const { generateToken, verifyToken } = require("../lib/jwt");
 const mailer = require("../lib/mailer");
 const mustache = require("mustache")
 const fs = require("fs");
+const { Console } = require("console");
 // tanya kak theo gimn carnaya forget password pake jwt
 // kalo mau tampilin waktu buat di detail post hrs ditolocalestring
 const authControllers = {
@@ -142,9 +143,10 @@ const authControllers = {
     try {
       const { id } = req.token;
 
+      console.log(id)
       const renewedToken = generateToken({ id });
       //  ngirim sebuah object bukan array seperti findOne
-      const findUser = User.findByPk(id);
+      const findUser = await User.findByPk(id);
 
       delete findUser.dataValues.password;
 

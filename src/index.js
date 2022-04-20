@@ -19,7 +19,7 @@ const { authRoutes, postRoutes } = require("./routes")
 app.use("/auth", authRoutes)
 app.use("/post", postRoutes)
 
-app.use((res) => {
+app.use((err, req, res, next) => {
     return res.status(500).json({
         message:"Server error"
     })
