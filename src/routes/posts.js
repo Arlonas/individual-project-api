@@ -6,6 +6,8 @@ const { authorizedLoggedInUser } = require("../middlewares/authMiddleware");
 
 router.get("/", postControllers.getAllPost);
 
+router.get("/:id", postControllers.getPostById)
+
 router.post(
   "/",
   fileUploader({
@@ -19,5 +21,8 @@ router.post(
 router.delete("/:id", authorizedLoggedInUser, postControllers.deletePostById);
 
 router.patch("/:id", authorizedLoggedInUser, postControllers.editPostById);
+
+router.post("/:postId/comments", authorizedLoggedInUser, postControllers.createComment)
+router.get("/:postId/comments", postControllers.getAllComment)
 
 module.exports = router;

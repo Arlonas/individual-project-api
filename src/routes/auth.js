@@ -12,4 +12,6 @@ router.get("/verify/:token", authControllers.verifyUser)
 router.post("/resend-verification", authorizedLoggedInUser, authControllers.resendVerificationEmail)
 
 router.post("/forgot-password", authControllers.forgotPassword)
+
+router.post("/change-password", authControllers.changePassword)
 module.exports = router

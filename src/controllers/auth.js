@@ -3,7 +3,7 @@ const { User } = require("../lib/sequelize");
 const bcrypt = require("bcrypt");
 const { generateToken, verifyToken } = require("../lib/jwt");
 const mailer = require("../lib/mailer");
-const mustache = require("mustache")
+const mustache = require("mustache");
 const fs = require("fs");
 const { Console } = require("console");
 // tanya kak theo gimn carnaya forget password pake jwt
@@ -17,7 +17,7 @@ const authControllers = {
           [Op.or]: [{ username }, { email }],
         },
       });
-      console.log(isUsernameEmailTaken)
+      console.log(isUsernameEmailTaken);
 
       if (isUsernameEmailTaken) {
         return res.status(400).json({
@@ -33,19 +33,24 @@ const authControllers = {
         password: hashedPassword,
       });
 
-      const verificationToken = generateToken({
-        id: newUser.id,
-        isEmailVerification: true,
-      }, "1h");
+      const verificationToken = generateToken(
+        {
+          id: newUser.id,
+          isEmailVerification: true,
+        },
+        "1h"
+      );
 
       const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`;
 
-      const template = fs.readFileSync(__dirname + "/../templates/verify.html").toString()
+      const template = fs
+        .readFileSync(__dirname + "/../templates/verify.html")
+        .toString();
 
       const renderedTemplate = mustache.render(template, {
         username,
-        verify_url: verificationLink
-      })
+        verify_url: verificationLink,
+      });
 
       await mailer({
         to: email,
@@ -55,8 +60,8 @@ const authControllers = {
 
       return res.status(201).json({
         message: "Registered User",
-        // di frontend g perlu res.data.result.datavalues lagi lgsng aja username ato id 
-        result: newUser
+        // di frontend g perlu res.data.result.datavalues lagi lgsng aja username ato id
+        result: newUser,
       });
     } catch (err) {
       console.log(err);
@@ -133,7 +138,9 @@ const authControllers = {
         }
       );
 
-      return res.redirect(`http://localhost:3000/verification-success?referral=${token}`)
+      return res.redirect(
+        `http://localhost:3000/verification-success?referral=${token}`
+      );
     } catch (err) {
       console.log(err);
       next(res);
@@ -143,7 +150,7 @@ const authControllers = {
     try {
       const { id } = req.token;
 
-      console.log(id)
+      // console.log(id)
       const renewedToken = generateToken({ id });
       //  ngirim sebuah object bukan array seperti findOne
       const findUser = await User.findByPk(id);
@@ -164,29 +171,34 @@ const authControllers = {
   },
   resendVerificationEmail: async (req, res, next) => {
     try {
-      const userId = req.token.id
+      const userId = req.token.id;
 
-      const findUser = await User.findByPk(userId)
+      const findUser = await User.findByPk(userId);
 
-      if(findUser.is_verified) {
+      if (findUser.is_verified) {
         returnres.status(400).json({
-          message: "User is already verified"
-        })
+          message: "User is already verified",
+        });
       }
 
-      const verificationToken = generateToken({
-        id: userId,
-        isEmailVerification: true,
-      }, "1h");
+      const verificationToken = generateToken(
+        {
+          id: userId,
+          isEmailVerification: true,
+        },
+        "1h"
+      );
 
       const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`;
 
-      const template = fs.readFileSync(__dirname + "/../templates/verify.html").toString()
+      const template = fs
+        .readFileSync(__dirname + "/../templates/verify.html")
+        .toString();
 
       const renderedTemplate = mustache.render(template, {
         username,
-        verify_url: verificationLink
-      })
+        verify_url: verificationLink,
+      });
 
       await mailer({
         to: findUser.email,
@@ -204,26 +216,82 @@ const authControllers = {
   },
   forgotPassword: async (req, res, next) => {
     try {
-      const { email } = req.body
+      const { email } = req.body;
 
       const findUser = await User.findOne({
         where: {
-          email
-        }
-      })
+          email,
+        },
+      });
+      if(!findUser) {
+        return res.status(400).json({
+          message: "Wrong email, Please input the right email"
+        })
+      }
 
-      const forgotPasswordToken = generateToken({
-        id: findUser.id
-      }, "15m");
+      const forgotPasswordToken = generateToken(
+        {
+          id: findUser.id,
+        },
+        "15m"
+      );
 
-      
+      const forgotPasswordLink = `http://localhost:2020/change-password?${forgotPasswordToken}`;
 
-      // di frontend dapetin token di url itu pake router.query.token
+      const template = fs
+        .readFileSync(__dirname + "/../templates/forgotPassword.html")
+        .toString();
+
+      const renderedTemplate = mustache.render(template, {
+        username: findUser.username,
+        verify_url: forgotPasswordLink,
+      });
+
+      await mailer({
+        to: email,
+        subject: "Please click the button below to change your password!",
+        html: renderedTemplate,
+      });
+
+      return res.status(201).json({
+        message: "Email sent, please check your inbox",
+      });
+
+      // di frontend dapetin token di url itu pake router.query.token.id buat daptein id dari user
     } catch (err) {
-      console.log(err)
-      next(res)
+      console.log(err);
+      next(res);
     }
-  }
+  },
+  changePassword: async (req, res, next) => {
+    try {
+      const { password, forgotPasswordToken } = req.body;
+
+      const verifiedforgotPasswordToken = verifyToken(forgotPasswordToken);
+
+      if (!verifiedforgotPasswordToken) {
+        return res.status(400).json({
+          message: "Invalid Token",
+        });
+      }
+      const hashedPassword = bcrypt.hashSync(password, 7);
+      await User.update(
+        { password: hashedPassword },
+        {
+          where: {
+            id: verifiedforgotPasswordToken.id,
+          },
+        }
+      );
+
+      return res.status(200).json({
+        message: "Change password success",
+      });
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
+  },
 };
 
 module.exports = authControllers;

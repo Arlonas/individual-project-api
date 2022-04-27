@@ -1,0 +1,20 @@
+PORT = 
+
+MYSQL_USERNAME = 
+MYSQL_PASSWORD =
+MYSQL_DB_NAME = 
+
+UPLOAD_FILE_DOMAIN=
+
+JWT_SECRET_KEY=SECRET_KEY
+
+NODEMAILER_USER = 
+NODEMAILER_PASS = 
+ 
+feat -> feature. Digunakan ketika ada perubahan di fitur.
+fix -> digunakan ketika melakukan bugfix
+ui -> digunakan ketika ada perubahan tampilan
+docs -> digunakan ketika ada perubahan dokumentasi
+chore -> digunakan ketika merapikan tetapi tidak mengubah
+            fungsi
+ref -> digunakan ketika melakukan perapihan fitur atau optimasi

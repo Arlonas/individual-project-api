@@ -8,6 +8,7 @@ const fileUploader = ({
 }) => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
+      // console.log(file)
       cb(null, `${__dirname}/../public/${destinationFolder}`);
     },
     filename: (req, file, cb) => {
@@ -23,7 +24,7 @@ const fileUploader = ({
     storage,
     dest: `${__dirname}/../public/posts`,
     fileFilter: (req, file, cb) => {
-      if (file.mimetype.split("/")[1] !== fileType) {
+      if (file.mimetype.split("/")[0] !== fileType) {
         return cb(null, false);
       }
 
