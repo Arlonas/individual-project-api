@@ -44,7 +44,11 @@ const PostControllers = {
   getPostById: async (req, res, next) => {
     try {
       const { id } = req.params;
+      const { _limit = 5, _sortBy = "", _sortDir = "" } = req.query
 
+      delete req.query._limit
+      delete req.query._sortBy
+      delete req.query._sortDir
       const findPostById = await Post.findOne({
         where: {
           id,
@@ -52,6 +56,7 @@ const PostControllers = {
         include: [
           {
             model: Comment,
+            limit: _limit ? parseInt(_limit) : undefined,
             include: [
               {
                 model: User,
@@ -67,6 +72,7 @@ const PostControllers = {
                 },
               },
             ],
+            order: _sortBy ? [[_sortBy, _sortDir]] : undefined
           },
           {
             model: User,
@@ -83,7 +89,7 @@ const PostControllers = {
           },
         ],
       });
-      console.log(findPostById);
+      // console.log(findPostById);
 
       delete findPostById.User.dataValues.password;
 
