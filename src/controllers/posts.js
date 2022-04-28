@@ -1,5 +1,5 @@
 const { nanoid } = require("nanoid");
-const { Post, User, Comment } = require("../lib/sequelize");
+const { Post, User, Comment, Like } = require("../lib/sequelize");
 const fs = require("fs");
 
 const PostControllers = {
@@ -49,7 +49,39 @@ const PostControllers = {
         where: {
           id,
         },
-        include: User,
+        include: [
+          {
+            model: Comment,
+            include: [
+              {
+                model: User,
+                attributes: {
+                  exclude: [
+                    "password",
+                    "email",
+                    "full_name",
+                    "is_verified",
+                    "createdAt",
+                    "updatedAt",
+                  ],
+                },
+              },
+            ],
+          },
+          {
+            model: User,
+            attributes: {
+              exclude: [
+                "password",
+                "email",
+                "full_name",
+                "is_verified",
+                "createdAt",
+                "updatedAt",
+              ],
+            },
+          },
+        ],
       });
       console.log(findPostById);
 
@@ -159,21 +191,27 @@ const PostControllers = {
   getAllComment: async (req, res, next) => {
     try {
       const { _sortBy = "", _sortDir = "" } = req.query;
-      const { postId } = req.params
+      const { postId } = req.params;
       delete req.query._sortBy;
       delete req.query._sortDir;
 
       const findComment = await Comment.findAndCountAll({
         where: {
           ...req.query,
-          post_id: postId
+          post_id: postId,
         },
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
         include: [
           {
             model: User,
             attributes: {
-              exclude: ["password", "email", "full_name", "is_verified", "updatedAt"],
+              exclude: [
+                "password",
+                "email",
+                "full_name",
+                "is_verified",
+                "updatedAt",
+              ],
             },
           },
         ],
@@ -182,6 +220,75 @@ const PostControllers = {
         message: "Find posts",
         result: findComment,
       });
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
+  },
+  createAndDeleteLike: async (req, res, next) => {
+    try {
+      const { postId } = req.params;
+      const postLikes = await Like.findOne({
+        where: {
+          post_id: postId,
+          user_id: req.token.id,
+        },
+      });
+      if (!postLikes) {
+        const newLike = await Like.create({
+          post_id: postId,
+          user_id: req.token.id,
+        });
+
+        await Post.increment({ like_count: 1 }, { where: { id: postId } });
+
+        return res.status(201).json({
+          message: "Like created",
+          result: newLike,
+        });
+      }
+      if (postLikes) {
+        Like.destroy({
+          where: {
+            post_id: postId,
+            user_id: req.token.id,
+          },
+          truncate: true,
+        });
+
+        await Post.increment({ like_count: -1 }, { where: { id: postId } });
+
+        return res.status(201).json({
+          message: "Like deleted",
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
+  },
+  getLikes: async (req, res, next) => {
+    try {
+      const { postId } = req.params;
+
+      const findLike = await Like.findOne({
+        where: {
+          post_id: postId,
+          user_id: req.token.id,
+        },
+      });
+      if (findLike) {
+        return res.status(200).json({
+          message: "post is liked",
+          result: true,
+        });
+      }
+      if (!findLike) {
+        return res.status(200).json({
+          message: "post are not liked",
+          result: false,
+        });
+      }
     } catch (err) {
       console.log(err);
       next(res);

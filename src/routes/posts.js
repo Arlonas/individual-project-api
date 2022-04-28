@@ -24,5 +24,7 @@ router.patch("/:id", authorizedLoggedInUser, postControllers.editPostById);
 
 router.post("/:postId/comments", authorizedLoggedInUser, postControllers.createComment)
 router.get("/:postId/comments", postControllers.getAllComment)
+router.post("/:postId/likes", authorizedLoggedInUser, postControllers.createAndDeleteLike)
+router.get("/:postId/likes", authorizedLoggedInUser, postControllers.getLikes)
 
 module.exports = router;

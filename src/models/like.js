@@ -2,24 +2,13 @@ const { DataTypes } = require("sequelize");
 
 const Like = (sequelize) => {
   return sequelize.define("Like", {
-    UserId: {
+    id: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
       allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
-      },
-    },
-
-    PostId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "Posts",
-        key: "id",
-      },
     },
   });
 };
 
-// module.exports = Like;
+module.exports = Like;
