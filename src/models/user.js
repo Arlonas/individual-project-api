@@ -23,6 +23,14 @@ const User = (sequelize) => {
             is_verified: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false
+            },
+            profile_picture: {
+                type: DataTypes.STRING,
+                allowNull: false
+            },
+            bio: {
+                type: DataTypes.STRING,
+                allowNull: false
             }
         }
     )

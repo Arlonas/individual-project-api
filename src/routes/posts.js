@@ -10,6 +10,7 @@ router.get("/:id", postControllers.getPostById)
 
 router.post(
   "/",
+  authorizedLoggedInUser,
   fileUploader({
     destinationFolder: "posts",
     fileType: "image",

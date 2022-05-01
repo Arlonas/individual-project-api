@@ -104,7 +104,7 @@ const PostControllers = {
   },
   createPost: async (req, res, next) => {
     try {
-      const { location, caption, like_count, date, user_id } = req.body;
+      const { location, caption, like_count, user_id } = req.body;
 
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = `post-images`;
@@ -116,7 +116,6 @@ const PostControllers = {
         location,
         caption,
         like_count,
-        date,
         user_id,
         id: nanoid(40),
       });
