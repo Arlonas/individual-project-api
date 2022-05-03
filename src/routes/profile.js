@@ -24,5 +24,6 @@ router.get(
   authorizedLoggedInUser,
   profileControllers.getUserLikedPostForMyProfile
 );
+router.get("/posts/likes/:id", profileControllers.getUserLikedPostForUserProfile);
 
 module.exports = router;

@@ -147,6 +147,43 @@ const profileControllers = {
       next(res);
     }
   },
+  getUserLikedPostForUserProfile: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const findUserLikedPost = await Like.findAll({
+        where: {
+          user_id: id,
+        },
+        include: [
+          {
+            model: Post,
+            attributes: {
+              exclude: [
+                "user_id",
+                "location",
+                "like_count",
+                "updatedAt",
+                "caption",
+                "createdAt"
+              ],
+            },
+          },
+        ],
+      });
+      if (!findUserLikedPost) {
+        return res.status(400).json({
+          message: "Liked post not found",
+        });
+      }
+      return res.status(200).json({
+        message: "Liked post found",
+        result: findUserLikedPost,
+      });
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
+  },
 };
 
 module.exports = profileControllers;
