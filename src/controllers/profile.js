@@ -1,5 +1,4 @@
 const { User, Post } = require("../lib/sequelize");
-const fs = require("fs");
 
 const profileControllers = {
   getMyProfile: async (req, res, next) => {
@@ -9,12 +8,45 @@ const profileControllers = {
           id: req.token.id,
         },
         attributes: {
+          exclude: ["password", "updatedAt", "id", "createdAt"],
+        },
+        include: [
+          {
+            model: Post,
+            attributes: {
+              exclude: [
+                "user_id",
+                "location",
+                "like_count",
+                "updatedAt",
+                "caption",
+                "createdAt",
+              ],
+            },
+            order: [["createdAt", "DESC"]]
+          },
+        ],
+      });
+      return res.status(200).json({
+        message: "My Profile found",
+        result: findMyProfile,
+      });
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
+  },
+  getProfileById: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const findUser = await User.findByPk(id, {
+        attributes: {
           exclude: [
             "password",
             "is_verified",
-            "updatedAt",
-            "id",
             "createdAt",
+            "updatedAt",
           ],
         },
         include: [
@@ -33,17 +65,15 @@ const profileControllers = {
           },
         ],
       });
+      if (!findUser) {
+        return res.status(400).json({
+          mesage: "User profile not found",
+        });
+      }
       return res.status(200).json({
-        message: "My Profile found",
-        result: findMyProfile,
+        message: "User profile found",
+        result: findUser,
       });
-    } catch (err) {
-      console.log(err);
-      next(res);
-    }
-  },
-  getProfileById: async (req, res, next) => {
-    try {
     } catch (err) {
       console.log(err);
       next(res);
@@ -69,7 +99,7 @@ const profileControllers = {
       const updatedMyProfile = await User.update(
         {
           ...req.body,
-          profile_picture: `${uploadFileDomain}/${filePath}/${filename}`
+          profile_picture: `${uploadFileDomain}/${filePath}/${filename}`,
         },
         {
           where: {
@@ -79,8 +109,8 @@ const profileControllers = {
       );
       return res.status(201).json({
         message: "Profile updated",
-        result: updatedMyProfile
-      })
+        result: updatedMyProfile,
+      });
     } catch (err) {
       console.log(err);
       next(res);

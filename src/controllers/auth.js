@@ -1,11 +1,11 @@
 const { Op } = require("sequelize");
+const { nanoid } = require("nanoid");
 const { User } = require("../lib/sequelize");
 const bcrypt = require("bcrypt");
 const { generateToken, verifyToken } = require("../lib/jwt");
 const mailer = require("../lib/mailer");
 const mustache = require("mustache");
 const fs = require("fs");
-const { Console } = require("console");
 // tanya kak theo gimn carnaya forget password pake jwt
 // kalo mau tampilin waktu buat di detail post hrs ditolocalestring
 const authControllers = {
@@ -31,6 +31,7 @@ const authControllers = {
         username,
         email,
         password: hashedPassword,
+        id: nanoid(40)
       });
 
       const verificationToken = generateToken(
@@ -176,7 +177,7 @@ const authControllers = {
       const findUser = await User.findByPk(userId);
 
       if (findUser.is_verified) {
-        returnres.status(400).json({
+        return res.status(400).json({
           message: "User is already verified",
         });
       }
@@ -196,7 +197,7 @@ const authControllers = {
         .toString();
 
       const renderedTemplate = mustache.render(template, {
-        username,
+        username: findUser.username,
         verify_url: verificationLink,
       });
 
