@@ -1,4 +1,4 @@
-const { User, Post } = require("../lib/sequelize");
+const { User, Post, Like } = require("../lib/sequelize");
 
 const profileControllers = {
   getMyProfile: async (req, res, next) => {
@@ -23,7 +23,7 @@ const profileControllers = {
                 "createdAt",
               ],
             },
-            order: [["createdAt", "DESC"]]
+            order: [["createdAt", "DESC"]],
           },
         ],
       });
@@ -42,12 +42,7 @@ const profileControllers = {
 
       const findUser = await User.findByPk(id, {
         attributes: {
-          exclude: [
-            "password",
-            "is_verified",
-            "createdAt",
-            "updatedAt",
-          ],
+          exclude: ["password", "is_verified", "createdAt", "updatedAt"],
         },
         include: [
           {
@@ -110,6 +105,42 @@ const profileControllers = {
       return res.status(201).json({
         message: "Profile updated",
         result: updatedMyProfile,
+      });
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
+  },
+  getUserLikedPostForMyProfile: async (req, res, next) => {
+    try {
+      const findUserLikedPost = await Like.findAll({
+        where: {
+          user_id: req.token.id,
+        },
+        include: [
+          {
+            model: Post,
+            attributes: {
+              exclude: [
+                "user_id",
+                "location",
+                "like_count",
+                "updatedAt",
+                "caption",
+                "createdAt"
+              ],
+            },
+          },
+        ],
+      });
+      if (!findUserLikedPost) {
+        return res.status(400).json({
+          message: "Liked post not found",
+        });
+      }
+      return res.status(200).json({
+        message: "Liked post found",
+        result: findUserLikedPost,
       });
     } catch (err) {
       console.log(err);

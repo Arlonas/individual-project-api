@@ -19,4 +19,10 @@ router.post(
   profileControllers.editMyProfile
 );
 
+router.get(
+  "/posts/likes",
+  authorizedLoggedInUser,
+  profileControllers.getUserLikedPostForMyProfile
+);
+
 module.exports = router;
