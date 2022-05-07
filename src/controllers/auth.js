@@ -237,7 +237,7 @@ const authControllers = {
         "15m"
       );
 
-      const forgotPasswordLink = `http://localhost:2020/change-password?${forgotPasswordToken}`;
+      const forgotPasswordLink = `http://localhost:3000/change-password?fpt=${forgotPasswordToken}`;
 
       const template = fs
         .readFileSync(__dirname + "/../templates/forgotPassword.html")

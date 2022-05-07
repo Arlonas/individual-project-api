@@ -195,17 +195,21 @@ const PostControllers = {
   },
   getAllComment: async (req, res, next) => {
     try {
-      const { _sortBy = "", _sortDir = "" } = req.query;
+      const { _sortBy = "", _sortDir = "", _limit = 10, _page = 1 } = req.query;
       const { postId } = req.params;
       delete req.query._sortBy;
       delete req.query._sortDir;
+      delete req.query._limit
+      delete req.query._page
 
       const findComment = await Comment.findAndCountAll({
         where: {
           ...req.query,
           post_id: postId,
         },
+        _limit: _limit ? parseInt(_limit) : undefined,
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
+        offset: (_page - 1) * _limit,
         include: [
           {
             model: User,
