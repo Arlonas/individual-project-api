@@ -71,10 +71,10 @@ const authControllers = {
   },
   signinUser: async (req, res, next) => {
     try {
-      const { username, password } = req.body;
+      const { usernameOrEmail, password } = req.body;
       const findUserSignIn = await User.findOne({
         where: {
-          username,
+          [Op.or]: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
         },
       });
 
