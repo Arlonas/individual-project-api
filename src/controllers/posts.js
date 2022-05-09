@@ -6,20 +6,19 @@ const PostControllers = {
   // kalo mau daptein user liked post mana tinggal fetch post dengan user id sama userid yang lagi login sama trs di include keusernya
   getAllPost: async (req, res, next) => {
     try {
-      // _limit = 5, _page = 1
-      const { _sortBy = "", _sortDir = "" } = req.query;
+      const { _sortBy = "", _sortDir = "", _limit = 5, _page = 1 } = req.query;
       //  didelete karena biar g masuk ke dalam wherenya
       // biar g error karena di dlm wherenya g ada kolom limit dan page
-      // delete req.query._limit;
-      // delete req.query._page;
+      delete req.query._limit;
+      delete req.query._page;
       delete req.query._sortBy;
       delete req.query._sortDir;
       const findPosts = await Post.findAndCountAll({
         where: {
           ...req.query,
         },
-        // _limit: _limit ? parseInt(_limit) : undefined,
-        // offset: (_page - 1) * _limit,
+        limit: _limit ? parseInt(_limit) : undefined,
+        offset: (_page - 1) * _limit,
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
         // kalo sortbynya createdat dia akan return array kalo g undefined
         include: [
