@@ -77,6 +77,11 @@ const authControllers = {
           [Op.or]: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
         },
       });
+      if(usernameOrEmail.includes("@") && !findUserSignIn) {
+        return res.status(400).json({
+          message: "Wrong email or password",
+        });
+      }
 
       if (!findUserSignIn) {
         return res.status(400).json({

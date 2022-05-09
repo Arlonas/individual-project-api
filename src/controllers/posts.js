@@ -207,7 +207,7 @@ const PostControllers = {
           ...req.query,
           post_id: postId,
         },
-        _limit: _limit ? parseInt(_limit) : undefined,
+        limit: _limit ? parseInt(_limit) : undefined,
         order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
         offset: (_page - 1) * _limit,
         include: [
