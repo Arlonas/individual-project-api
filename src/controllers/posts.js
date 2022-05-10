@@ -40,6 +40,38 @@ const PostControllers = {
       next(res);
     }
   },
+  getAllPostWithoutPageAndLimit: async (req, res, next) => {
+    try {
+      const { _sortBy = "", _sortDir = "" } = req.query;
+      //  didelete karena biar g masuk ke dalam wherenya
+      // biar g error karena di dlm wherenya g ada kolom limit dan page
+      delete req.query._sortBy;
+      delete req.query._sortDir;
+      const findPosts = await Post.findAndCountAll({
+        where: {
+          ...req.query,
+        },
+        order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
+        // kalo sortbynya createdat dia akan return array kalo g undefined
+        include: [
+          {
+            model: User,
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        message: "Find posts",
+        result: findPosts,
+      });
+    } catch (err) {
+      console.log(err);
+      next(res);
+    }
+  },
   getPostById: async (req, res, next) => {
     try {
       const { id } = req.params;

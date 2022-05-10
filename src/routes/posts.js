@@ -5,6 +5,7 @@ const router = require("express").Router();
 const { authorizedLoggedInUser } = require("../middlewares/authMiddleware");
 
 router.get("/", postControllers.getAllPost);
+router.get("/postsWithoutPageAndLimit", postControllers.getAllPostWithoutPageAndLimit);
 
 router.get("/:id", postControllers.getPostById)
 
