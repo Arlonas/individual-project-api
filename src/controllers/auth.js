@@ -1,6 +1,10 @@
 const { Op } = require("sequelize");
 const { nanoid } = require("nanoid");
-const { User } = require("../lib/sequelize");
+const {
+  User,
+  ForgotPasswordToken,
+  VerificationToken,
+} = require("../lib/sequelize");
 const bcrypt = require("bcrypt");
 const { generateToken, verifyToken } = require("../lib/jwt");
 const mailer = require("../lib/mailer");
@@ -31,7 +35,7 @@ const authControllers = {
         username,
         email,
         password: hashedPassword,
-        id: nanoid(40)
+        id: nanoid(40),
       });
 
       const verificationToken = generateToken(
@@ -41,6 +45,11 @@ const authControllers = {
         },
         "1h"
       );
+      await VerificationToken.create({
+        token: verificationToken,
+        user_id: newUser.id,
+        is_valid: true,
+      });
 
       const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`;
 
@@ -77,7 +86,7 @@ const authControllers = {
           [Op.or]: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
         },
       });
-      if(usernameOrEmail.includes("@") && !findUserSignIn) {
+      if (usernameOrEmail.includes("@") && !findUserSignIn) {
         return res.status(400).json({
           message: "Wrong email or password",
         });
@@ -134,6 +143,17 @@ const authControllers = {
           message: "Token invalid!",
         });
       }
+      const findToken = await VerificationToken.findOne({
+        where: {
+          token,
+          is_valid: true,
+        },
+      });
+      if (!findToken) {
+        return res.status(400).json({
+          message: "Token invalid!",
+        });
+      }
 
       await User.update(
         { is_verified: true },
@@ -143,6 +163,8 @@ const authControllers = {
           },
         }
       );
+      findToken.is_valid = false;
+      findToken.save();
 
       return res.redirect(
         `http://localhost:3000/verification-success?referral=${token}`
@@ -186,6 +208,15 @@ const authControllers = {
           message: "User is already verified",
         });
       }
+      await VerificationToken.update(
+        { is_valid: false },
+        {
+          where: {
+            is_valid: true,
+            user_id: userId,
+          },
+        }
+      );
 
       const verificationToken = generateToken(
         {
@@ -194,6 +225,11 @@ const authControllers = {
         },
         "1h"
       );
+      await VerificationToken.create({
+        token: verificationToken,
+        user_id: userId,
+        is_valid: true,
+      });
 
       const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`;
 
@@ -229,11 +265,20 @@ const authControllers = {
           email,
         },
       });
-      if(!findUser) {
+      if (!findUser) {
         return res.status(400).json({
-          message: "Wrong email, Please input the right email"
-        })
+          message: "Wrong email, Please input the right email",
+        });
       }
+      await ForgotPasswordToken.update(
+        { is_valid: false },
+        {
+          where: {
+            user_id: findUser.id,
+            is_valid: true,
+          },
+        }
+      );
 
       const forgotPasswordToken = generateToken(
         {
@@ -241,6 +286,11 @@ const authControllers = {
         },
         "15m"
       );
+      await ForgotPasswordToken.create({
+        token: passwordToken,
+        is_valid: true,
+        user_id: findUser.id,
+      });
 
       const forgotPasswordLink = `http://localhost:3000/change-password?fpt=${forgotPasswordToken}`;
 
@@ -279,6 +329,18 @@ const authControllers = {
         return res.status(400).json({
           message: "Invalid Token",
         });
+      }
+      const findToken = await ForgotPasswordToken.findOne({
+        where: {
+          token: forgotPasswordToken,
+          is_valid: true,
+        }
+      })
+
+      if (!findToken) {
+        return res.status(400).json({
+          message: "Invalid token"
+        })
       }
       const hashedPassword = bcrypt.hashSync(password, 7);
       await User.update(
