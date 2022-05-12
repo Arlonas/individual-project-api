@@ -42,9 +42,10 @@ const PostControllers = {
   },
   getAllPostWithoutPageAndLimit: async (req, res, next) => {
     try {
-      const { _sortBy = "", _sortDir = "" } = req.query;
+      const { _sortBy = "", _sortDir = "", } = req.query;
       //  didelete karena biar g masuk ke dalam wherenya
       // biar g error karena di dlm wherenya g ada kolom limit dan page
+      // di spread req.query supaya apapun data bisa masuk dijadiin where clausenya
       delete req.query._sortBy;
       delete req.query._sortDir;
       const findPosts = await Post.findAndCountAll({
